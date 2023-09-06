@@ -6,11 +6,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Entity(name = "USUARIO")
+@Entity(name = "USUARIOC")
 public class UsuarioEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "USUARIO_SEQUENCIA")
-    @SequenceGenerator(name ="USUARIO_SEQUENCIA", sequenceName = "seq_usuario", allocationSize = 1)
+    @SequenceGenerator(name ="USUARIO_SEQUENCIA", sequenceName = "seq_usuarioc", allocationSize = 1)
     @Column(name = "id_usuario")
     private Integer idUsuario;
 

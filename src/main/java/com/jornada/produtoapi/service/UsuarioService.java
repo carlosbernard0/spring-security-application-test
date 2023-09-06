@@ -4,9 +4,13 @@ import com.jornada.produtoapi.dto.AutenticacaoDTO;
 import com.jornada.produtoapi.entity.UsuarioEntity;
 import com.jornada.produtoapi.exceptions.BusinessException;
 import com.jornada.produtoapi.repository.UsuarioRepository;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -14,14 +18,33 @@ import java.util.Optional;
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
+    @Value("${jwt.validade.token}")
+    private String validadeJWT;
+
+    @Value("${jwt.secret}")
+    private String secret;
+
     public String fazerLogin(AutenticacaoDTO autenticacaoDTO) throws BusinessException {
         Optional<UsuarioEntity> usuarioEntityOptional =usuarioRepository.findByLoginAndSenha(autenticacaoDTO.getLogin(), autenticacaoDTO.getSenha());
         if (usuarioEntityOptional.isEmpty()){
             throw new BusinessException("Usuario e senha inválidos");
         }
         UsuarioEntity usuario = usuarioEntityOptional.get();
-        String tokenGerado = usuario.getLogin() + "-" + usuario.getSenha();
-        return tokenGerado;
+//        String tokenGerado = usuario.getLogin() + "-" + usuario.getSenha();
+//        return tokenGerado;
+
+        Date dataAtual = new Date();
+        Date dataExpiracao = new Date(dataAtual.getTime()+Long.parseLong(validadeJWT));
+
+
+        String jwtGerado = Jwts.builder()
+                .setIssuer("produto-api")
+                .setSubject(usuario.getIdUsuario().toString())
+                .setIssuedAt(dataExpiracao)
+                .signWith(SignatureAlgorithm.HS256,secret)
+                .compact();
+
+        return jwtGerado;
     }
 
     // token = null

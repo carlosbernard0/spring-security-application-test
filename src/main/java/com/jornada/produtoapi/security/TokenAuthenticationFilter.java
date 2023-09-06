@@ -26,7 +26,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         //recuperar verificar o token da request
-        String tokenBearer = request.getHeader("Authoriazation");
+        String tokenBearer = request.getHeader("Authorization");
         //validar o token
         try {
             UsuarioEntity usuario = usuarioService.validarToken(tokenBearer);
