@@ -4,6 +4,8 @@ import com.jornada.produtoapi.dto.AutenticacaoDTO;
 import com.jornada.produtoapi.entity.UsuarioEntity;
 import com.jornada.produtoapi.exceptions.BusinessException;
 import com.jornada.produtoapi.repository.UsuarioRepository;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Optional;
+
+import static io.jsonwebtoken.Jwts.parser;
 
 @Service
 @RequiredArgsConstructor
@@ -55,8 +59,15 @@ public class UsuarioService {
         }
 
         String tokenLimpo = token.replace("Bearer ", ""); //<TOKEN> (USUARIO-SENHA)
-        String[] usuarioESenha = tokenLimpo.split("-"); //[0] =USUARIO, [1] =SENHA
-        Optional<UsuarioEntity> usuarioEntityOptional= usuarioRepository.findByLoginAndSenha(usuarioESenha[0], usuarioESenha[1]);
+
+        Claims claims = Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(tokenLimpo) //decriptograda e valida o token VALIDAÇÃO AQUI
+                .getBody(); //recuperar o payload
+
+        String subject = claims.getSubject(); //ID usuario
+
+        Optional<UsuarioEntity> usuarioEntityOptional= usuarioRepository.findById(Integer.parseInt(subject));
         return usuarioEntityOptional.orElseThrow(()-> new BusinessException("Usuario e senha inválidos"));
     }
 }
